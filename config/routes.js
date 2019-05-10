@@ -1,5 +1,6 @@
 const axios = require("axios");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const db = require("../database/dbConfig");
 const { authenticate } = require("../auth/authenticate");
@@ -28,8 +29,23 @@ function register(req, res) {
     });
 }
 
+// Use the credentials sent inside the body to authenticate the user.
+// If login fails, respond with the correct status code and the message: 'Invalid credentials!'
 function login(req, res) {
   // implement user login
+  const { username, password } = req.body;
+  db("users")
+    .first() // It won't show array by adding the first() method, instead we should only get one object
+    .then(user => {
+      if (user && bcrypt.compareSync(password, user.password)) {
+        res.status(200).json({ message: `Welcome ${user.username}!` });
+      } else {
+        res.status(401).json({ message: "Invalid credentials!" });
+      }
+    })
+    .catch(err => {
+      res.status(500).json(err);
+    });
 }
 
 function getJokes(req, res) {
