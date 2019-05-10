@@ -2,7 +2,6 @@ const axios = require("axios");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const secrets = require("./secrets.js");
 const db = require("../database/dbConfig");
 const { authenticate } = require("../auth/authenticate");
 
@@ -18,10 +17,12 @@ function generateToken(user) {
     username: user.username
   };
 
+  const secret = process.env.JWT_SECRET;
+
   const options = {
     expiresIn: "24h"
   };
-  return jwt.sign(payload, secrets.jwtSecret, options); // returns asigned token
+  return jwt.sign(payload, secret, options); // returns asigned token
 }
 
 // Creates a user using the information sent inside the body of the request.
