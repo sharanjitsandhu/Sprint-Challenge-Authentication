@@ -11,6 +11,19 @@ module.exports = server => {
   server.get("/api/jokes", authenticate, getJokes);
 };
 
+// jsonwebtoken lib is used to produce a token
+function generateToken(user) {
+  const payload = {
+    username: user.username
+  };
+
+  const secret = "secret secret";
+  const options = {
+    expiresIn: "24h"
+  };
+  return jwt.sign(payload, secret, options); // returns asigned token
+}
+
 // Creates a user using the information sent inside the body of the request.
 // Hash the password before saving the user to the database.
 function register(req, res) {
@@ -37,8 +50,9 @@ function login(req, res) {
   db("users")
     .first() // It won't show array by adding the first() method, instead we should only get one object
     .then(user => {
-      if (user && bcrypt.compareSync(password, user.password)) {
-        res.status(200).json({ message: `Welcome ${user.username}!` });
+      if (username && bcrypt.compareSync(password, user.password)) {
+        const token = generateToken(user);
+        res.status(200).json({ message: `Welcome ${user.username}!`, token });
       } else {
         res.status(401).json({ message: "Invalid credentials!" });
       }
